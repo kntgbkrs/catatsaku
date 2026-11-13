@@ -184,7 +184,7 @@
       const n = db ? App.notifikasi() : { jumlah: 0 };
       const lainnyaAktif = App.halaman === 'pengaturan';
       $('#header').innerHTML = `<div class="wrap">
-        <a class="brand" href="#/dashboard" aria-label="Catatsaku — Dashboard"><span class="brand-mark">CS</span><span class="nm">Catatsaku</span></a>
+        <a class="brand" href="#/dashboard" aria-label="Catatsaku — Dashboard"><img class="brand-mark" src="img/logo.svg" alt="" width="34" height="34"><span class="nm">Catatsaku</span></a>
         <nav class="nav-pills" aria-label="Menu utama">${NAV.map(([k, l]) => `<a class="nav-pill ${App.halaman === k ? 'active' : ''}" href="#/${k}" ${App.halaman === k ? 'aria-current="page"' : ''}>${l}</a>`).join('')}
           <button class="nav-pill ${lainnyaAktif ? 'active' : ''}" type="button" data-lainnya aria-haspopup="menu">Lainnya ${UI.ic('chevron-down', 'ic-xs')}</button></nav>
         <div class="header-actions">

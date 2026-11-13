@@ -31,7 +31,7 @@
     },
 
     kerangka(isi) {
-      return `<div class="lock-top"><a class="brand" href="#/dashboard" aria-label="Catatsaku"><span class="brand-mark">CS</span><span class="nm">Catatsaku</span></a>
+      return `<div class="lock-top"><a class="brand" href="#/dashboard" aria-label="Catatsaku"><img class="brand-mark" src="img/logo.svg" alt="" width="34" height="34"><span class="nm">Catatsaku</span></a>
         <div class="row"><button class="icon-btn outlined" type="button" data-tema aria-label="Ganti tema">${UI.ic(document.documentElement.dataset.theme === 'light' ? 'moon' : 'sun')}</button></div></div>
         <div class="lock-main">${isi}</div>
         <div class="app-foot" style="border:0;padding-bottom:22px"><div class="wrap"><span>Catatsaku © ${new Date().getFullYear()} — Sistem Tata Kelola Finansial Personal · Asia/Makassar (WITA)</span></div></div>`;

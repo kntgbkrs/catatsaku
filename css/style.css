@@ -151,11 +151,7 @@ img { display: block; }
 .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 32px; }
 .brand { display: flex; align-items: center; gap: 10px; font: 800 19px/1 var(--font-head); letter-spacing: -.02em; color: var(--text); flex: none; }
 .brand:hover { text-decoration: none; }
-.brand-mark {
-  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
-  background: var(--accent-bg); color: var(--on-accent); font: 800 13px/1 var(--font-head); letter-spacing: 0;
-  box-shadow: var(--btn-glow);
-}
+.brand-mark { width: 34px; height: 34px; border-radius: 22%; display: block; flex: none; box-shadow: 0 0 0 1px var(--border); }
 .nav-pills {
   display: flex; gap: 2px; padding: 4px; border-radius: var(--r-pill);
   background: var(--surface); border: 1px solid var(--border); overflow-x: auto; scrollbar-width: none;
