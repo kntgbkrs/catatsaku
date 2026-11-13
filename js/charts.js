@@ -82,13 +82,15 @@
       const w = warna(), d = dasar(w);
       const sorot = o.sorot || o.labels.map(() => true);
       d.onClick = klik(o.onKlik);
+      const rp = (v, x) => (o.sembunyi ? 'Rp ••••••' : U.rp(v, x));
+      if (o.sembunyi) d.scales.y.ticks.callback = () => '••••';
       d.plugins.tooltip.callbacks = {
-        label: c => ` ${c.dataset.label}: ${U.rp(c.raw)}`,
+        label: c => ` ${c.dataset.label}: ${rp(c.raw)}`,
         afterBody: items => {
           const m = items.find(i => i.datasetIndex === 0), k = items.find(i => i.datasetIndex === 1);
           if (!m || !k) return '';
           const pc = m.raw ? Math.round((m.raw - k.raw) / m.raw * 100) : null;
-          return pc === null ? '' : `Bersih: ${U.rp(m.raw - k.raw, { tanda: true })} (${pc}% dari pemasukan)`;
+          return pc === null ? '' : `Bersih: ${rp(m.raw - k.raw, { tanda: true })} (${pc}% dari pemasukan)`;
         }
       };
       return buat(canvas, {

@@ -230,7 +230,9 @@
     },
 
     // ------------------------------------------------------------- insight (aturan, tanpa AI)
-    insights(db, per, ambang) {
+    /** rp = formatter Rupiah opsional (Dashboard memakainya untuk menyamarkan nominal). */
+    insights(db, per, ambang, rp) {
+      rp = rp || U.rp;
       const r = C.ringkas(db, per.dari, per.sampai), p = C.ringkas(db, per.prev.dari, per.prev.sampai);
       const out = [];
       const e = U.esc;
@@ -238,31 +240,31 @@
       if (r.perKat.length) {
         const k = r.perKat[0];
         out.push({ tipe: 'kategori', warna: k.kat.Warna, link: q({ jenis: 'Keluar', kat: k.id }),
-          html: `<b>${e(k.kat.Nama)}</b> pengeluaran terbesar: <b class="num">${U.rp(k.nominal)}</b> (${U.persen(k.persen)} dari total).` });
+          html: `<b>${e(k.kat.Nama)}</b> pengeluaran terbesar: <b class="num">${rp(k.nominal)}</b> (${U.persen(k.persen)} dari total).` });
       }
       if (r.keluar || p.keluar) {
         const sel = r.keluar - p.keluar, pc = C.ubah(r.keluar, p.keluar);
-        const arah = sel <= 0 ? `<b class="t-ok">turun ${pc === null ? '' : U.persen(Math.abs(pc), 1)}</b> (hemat <b class="num">${U.rp(-sel)}</b>)`
-          : `<b class="t-danger">naik ${pc === null ? '' : U.persen(pc, 1)}</b> (+<b class="num">${U.rp(sel)}</b>)`;
+        const arah = sel <= 0 ? `<b class="t-ok">turun ${pc === null ? '' : U.persen(Math.abs(pc), 1)}</b> (hemat <b class="num">${rp(-sel)}</b>)`
+          : `<b class="t-danger">naik ${pc === null ? '' : U.persen(pc, 1)}</b> (+<b class="num">${rp(sel)}</b>)`;
         out.push({ tipe: 'aruskas', warna: sel <= 0 ? 'hijau' : 'mawar', link: q({ jenis: 'Keluar' }), html: `Pengeluaran ${arah} dibanding periode sebelumnya.` });
       }
       if (r.masuk || r.keluar || p.masuk || p.keluar) {
         const sel = r.net - p.net;
         out.push({ tipe: 'aruskas', warna: r.net >= 0 ? 'hijau' : 'mawar', link: q({}),
-          html: `Arus kas bersih <b class="num ${r.net >= 0 ? 't-ok' : 't-danger'}">${U.rp(r.net, { tanda: true })}</b>, ${sel >= 0 ? 'membaik' : 'menurun'} <b class="num">${U.rp(Math.abs(sel))}</b> dari periode sebelumnya.` });
+          html: `Arus kas bersih <b class="num ${r.net >= 0 ? 't-ok' : 't-danger'}">${rp(r.net, { tanda: true })}</b>, ${sel >= 0 ? 'membaik' : 'menurun'} <b class="num">${rp(Math.abs(sel))}</b> dari periode sebelumnya.` });
       }
       const ym = per.sampai >= U.hariIni() ? U.hariIni().slice(0, 7) : per.sampai.slice(0, 7);
       C.anggaran(db, ym, ambang).filter(x => x.status !== 'aman').slice(0, 3).forEach(x => {
         out.push({ tipe: 'anggaran', warna: x.status === 'lewat' ? 'mawar' : 'amber', link: '#/anggaran?bulan=' + ym,
           html: x.status === 'lewat'
-            ? `Anggaran <b>${e(x.kat.Nama)}</b> <b class="t-danger">terlampaui ${U.persen(x.persen)}</b> — lebih <b class="num">${U.rp(-x.sisa)}</b>.`
-            : `Anggaran <b>${e(x.kat.Nama)}</b> sudah <b class="t-warn">${U.persen(x.persen)}</b> — hampir habis (sisa <span class="num">${U.rp(x.sisa)}</span>).` });
+            ? `Anggaran <b>${e(x.kat.Nama)}</b> <b class="t-danger">terlampaui ${U.persen(x.persen)}</b> — lebih <b class="num">${rp(-x.sisa)}</b>.`
+            : `Anggaran <b>${e(x.kat.Nama)}</b> sudah <b class="t-warn">${U.persen(x.persen)}</b> — hampir habis (sisa <span class="num">${rp(x.sisa)}</span>).` });
       });
       (db.target || []).filter(t => t.Status === 'Aktif').forEach(t => {
         const i = C.target(db, t);
         out.push({ tipe: 'target', warna: i.tercapai ? 'hijau' : 'oranye', link: '#/target?id=' + t.ID,
           html: i.tercapai ? `Target <b>${e(t.Nama)}</b> <b class="t-ok">tercapai ${U.persen(i.persen, 1)}</b>. Saatnya dirayakan!`
-            : `Target <b>${e(t.Nama)}</b> ${U.persen(i.persen, 1)} tercapai — kurang <b class="num">${U.rp(i.sisa)}</b>, ${C.sisaWaktu(i.hariLagi)}.` });
+            : `Target <b>${e(t.Nama)}</b> ${U.persen(i.persen, 1)} tercapai — kurang <b class="num">${rp(i.sisa)}</b>, ${C.sisaWaktu(i.hariLagi)}.` });
       });
       return out;
     }

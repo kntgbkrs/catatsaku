@@ -3,6 +3,9 @@
   window.Pages = window.Pages || {};
   const e = U.esc;
   const st = { tab: 'bulanan', chip: 'semua', jenis: 'semua' };
+  // Sembunyikan nominal: berlaku untuk SEMUA angka Rupiah di Dashboard saja (pilihan per perangkat).
+  const sembunyi = () => U.bacaLokal('cs_sembunyi_saldo') === '1';
+  const rp = (v, o) => (sembunyi() ? 'Rp\u00a0••••••' : U.rp(v, o));
 
   function seriBulan(per) {
     let bulan = per.bulan.slice();
@@ -26,19 +29,15 @@
 
       // ---------------- KPI
       const kpi = `
-        <section class="card glow span-2 kpi" aria-label="Total saldo">
-          <div class="row-between"><span class="eyebrow">Total saldo</span><span class="row" style="gap:8px">${UI.delta(Calc.ubah(s.total, sLalu.total))}<a class="icon-btn" href="#/dompet" aria-label="Lihat dompet" style="width:32px;height:32px">${UI.ic('arrow-up-right', 'ic-sm')}</a></span></div>
-          <div class="kpi-value xl num">${U.rp(s.total)}</div>
-          <div class="kpi-sub num">Likuid ${U.rp(s.likuid)} · Tabungan ${U.rp(s.tabungan)}</div>
-        </section>
+        ${Dash.kartuSaldo(s, sLalu)}
         <a class="card tight kpi" href="${linkRiwayat({ jenis: 'Masuk', dari: per.dari, sampai: per.sampai })}" style="color:inherit;text-decoration:none">
           <div class="row-between"><span class="eyebrow">Pemasukan</span>${UI.delta(Calc.ubah(r.masuk, p.masuk))}</div>
-          <div class="kpi-value md num">${U.rp(r.masuk)}</div><div class="kpi-sub">${e(per.nama.toLowerCase())}</div></a>
+          <div class="kpi-value md num">${rp(r.masuk)}</div><div class="kpi-sub">${e(per.nama.toLowerCase())}</div></a>
         <a class="card tight kpi" href="${linkRiwayat({ jenis: 'Keluar', dari: per.dari, sampai: per.sampai })}" style="color:inherit;text-decoration:none">
           <div class="row-between"><span class="eyebrow">Pengeluaran</span>${UI.delta(Calc.ubah(r.keluar, p.keluar), true)}</div>
-          <div class="kpi-value md num">${U.rp(r.keluar)}</div><div class="kpi-sub">total keluar</div></a>
+          <div class="kpi-value md num">${rp(r.keluar)}</div><div class="kpi-sub">total keluar</div></a>
         <section class="card tight span-2 kpi" style="border-color:var(--accent-ring)">
-          <div class="row-between"><div><span class="eyebrow">Arus kas bersih</span><div class="kpi-value md num ${r.net >= 0 ? 't-accent' : 't-danger'}" style="margin-top:8px">${U.rp(r.net, { tanda: true })}</div></div>
+          <div class="row-between"><div><span class="eyebrow">Arus kas bersih</span><div class="kpi-value md num ${r.net >= 0 ? 't-accent' : 't-danger'}" style="margin-top:8px">${rp(r.net, { tanda: true })}</div></div>
           <span class="row" style="gap:8px">${r.masuk ? `<span class="badge ${r.net >= 0 ? 'solid' : 'danger'}">${r.net >= 0 ? '▲' : '▼'} ${U.persen(Math.abs(r.net) / r.masuk * 100)} ${r.net >= 0 ? 'Surplus' : 'Defisit'}</span>` : ''}${UI.delta(Calc.ubah(r.net, p.net))}</span></div>
         </section>`;
 
@@ -63,7 +62,7 @@
       const breakdown = `
         <section class="card" aria-labelledby="h-kat">
           <div class="card-head"><h2 class="card-title" id="h-kat">Pengeluaran per Kategori</h2><span class="eyebrow">${e(per.label)}</span></div>
-          <div class="kpi-value num" style="margin-top:0">${U.rp(r.keluar)}</div><div class="kpi-sub">Total pengeluaran tercatat</div>
+          <div class="kpi-value num" style="margin-top:0">${rp(r.keluar)}</div><div class="kpi-sub">Total pengeluaran tercatat</div>
           ${r.keluar ? `<div class="segbar mt-24" role="img" aria-label="Komposisi pengeluaran">${seg.map(x => `<span class="c-${e(x.warna)}" style="flex-grow:${x.nominal}" title="${e(x.nama)} ${U.persen(x.persen)}" data-kat="${x.id}"></span>`).join('')}</div>
             <div class="legend-grid mt-24">${seg.map(x => `<button type="button" data-kat="${x.id}" class="c-${e(x.warna)}"><i class="dotc"></i><span class="nm">${e(x.nama)}</span><span class="pc">${U.persen(x.persen)}</span></button>`).join('')}</div>`
             : UI.kosong('pie-chart', 'Belum ada pengeluaran periode ini', 'Catat pengeluaran pertama Anda untuk melihat komposisinya.')}
@@ -78,7 +77,7 @@
             <a class="item" href="#/anggaran?bulan=${ymAng}" style="display:block;color:inherit;text-decoration:none">
               <div class="row-between"><span class="row" style="gap:10px">${UI.tileKat(x.kat, 'sm')}<b style="font-size:14.5px">${e(x.kat.Nama)}</b></span>${Dash.badgeAng(x)}</div>
               <div class="mt-12">${UI.progress(x.persen, x.status)}</div>
-              <div class="row-between mt-8" style="font-size:13px"><span class="muted num">${U.rp(x.pakai)} / ${U.rp(x.batas)}</span><b class="num ${x.status === 'lewat' ? 't-danger' : x.status === 'hampir' ? 't-warn' : ''}">${U.persen(x.persen)}</b></div>
+              <div class="row-between mt-8" style="font-size:13px"><span class="muted num">${rp(x.pakai)} / ${rp(x.batas)}</span><b class="num ${x.status === 'lewat' ? 't-danger' : x.status === 'hampir' ? 't-warn' : ''}">${U.persen(x.persen)}</b></div>
             </a>`).join('') : UI.kosong('pie-chart', 'Belum ada anggaran', 'Tetapkan batas per kategori agar pengeluaran terkendali.', '<a class="btn btn-secondary btn-sm mt-8" href="#/anggaran">Atur anggaran</a>')}
           <div class="divider"></div><div class="right"><a class="link-more" href="#/anggaran">Kelola anggaran ${UI.ic('arrow-right', 'ic-sm')}</a></div>
         </section>`;
@@ -100,7 +99,7 @@
           <div class="card-head"><h2 class="card-title" id="h-tgt">Target Tabungan</h2><a class="link-more" href="#/target">Kelola ${UI.ic('arrow-right', 'ic-sm')}</a></div>
           ${targets.length ? targets.slice(0, 3).map(t => { const i = Calc.target(db, t); return `
             <a class="panel row mt-12" href="#/target?id=${t.ID}" style="color:inherit;text-decoration:none">${UI.ring(i.persen, 52, 5, U.persen(i.persen), i.tercapai ? 'hijau' : 'oranye')}
-              <div class="grow"><b>${e(t.Nama)}</b><div class="muted num" style="font-size:13px">${U.rp(i.terkumpul)} / ${U.rp(t.Nominal_Target)}</div></div>${UI.ic('chevron-right', 'ic-sm')}</a>`; }).join('')
+              <div class="grow"><b>${e(t.Nama)}</b><div class="muted num" style="font-size:13px">${rp(i.terkumpul)} / ${rp(t.Nominal_Target)}</div></div>${UI.ic('chevron-right', 'ic-sm')}</a>`; }).join('')
             : UI.kosong('target', 'Belum ada target', 'Buat target tabungan dan pantau progresnya.', '<a class="btn btn-secondary btn-sm mt-8" href="#/target?baru=1">Buat target</a>')}
         </section>`;
 
@@ -110,7 +109,7 @@
         <section class="card tight o-7" aria-label="Transfer terakhir">
           <div class="row-between"><span class="eyebrow">${tf.Sumber === 'Kontribusi' ? 'Kontribusi terakhir' : 'Transfer terakhir'}</span><span class="muted" style="font-size:13px">${U.tgl(tf.Tanggal)}</span></div>
           <div class="panel inset route mt-12">${Dash.ujung(ix.dompet.get(tf.Dompet_Asal_ID))}
-            <div class="grow"><div class="amt-mid num">${U.rp(tf.Nominal)}</div><div class="line"></div></div>${Dash.ujung(ix.dompet.get(tf.Dompet_Tujuan_ID), true)}</div>
+            <div class="grow"><div class="amt-mid num">${rp(tf.Nominal)}</div><div class="line"></div></div>${Dash.ujung(ix.dompet.get(tf.Dompet_Tujuan_ID), true)}</div>
         </section>` : '';
 
       return `
@@ -129,6 +128,18 @@
         </div>`;
     },
 
+    /** Kartu Total Saldo + tombol mata (sembunyikan semua nominal di Dashboard). */
+    kartuSaldo(s, sLalu) {
+      const h = sembunyi(), t = (h ? 'Tampilkan' : 'Sembunyikan') + ' semua nominal di Dashboard';
+      return `<section class="card glow span-2 kpi" aria-label="Total saldo">
+          <div class="row-between"><span class="eyebrow">Total saldo
+            <button class="icon-btn" type="button" data-sembunyi aria-pressed="${h}" aria-label="${t}" title="${t}" style="width:32px;height:32px">${UI.ic(h ? 'eye-off' : 'eye', 'ic-sm')}</button></span>
+            <span class="row" style="gap:8px">${UI.delta(Calc.ubah(s.total, sLalu.total))}<a class="icon-btn" href="#/dompet" aria-label="Lihat dompet" style="width:32px;height:32px">${UI.ic('arrow-up-right', 'ic-sm')}</a></span></div>
+          <div class="kpi-value xl num">${rp(s.total)}</div>
+          <div class="kpi-sub num">Likuid ${rp(s.likuid)} · Tabungan ${rp(s.tabungan)}</div>
+        </section>`;
+    },
+
     badgeAng(x) {
       return x.status === 'lewat' ? UI.badge('Terlampaui', 'danger') : x.status === 'hampir' ? UI.badge('Hampir habis', 'warn') : UI.badge('Aman', 'ok');
     },
@@ -140,14 +151,14 @@
       const k = ix.kategori.get(t.Kategori_ID);
       const nama = t.Catatan || (t.Jenis === 'Transfer' ? `${(ix.dompet.get(t.Dompet_Asal_ID) || {}).Nama || '?'} → ${(ix.dompet.get(t.Dompet_Tujuan_ID) || {}).Nama || '?'}` : (k ? k.Nama : t.Jenis));
       const kelas = t.Jenis === 'Masuk' ? 'in' : t.Jenis === 'Keluar' ? 'out' : 'tr';
-      const nilai = t.Jenis === 'Masuk' ? U.rp(t.Nominal, { tanda: true }) : t.Jenis === 'Keluar' ? U.rp(-t.Nominal) : U.rp(t.Nominal);
+      const nilai = t.Jenis === 'Masuk' ? rp(t.Nominal, { tanda: true }) : t.Jenis === 'Keluar' ? rp(-t.Nominal) : rp(t.Nominal);
       return `<button type="button" class="item clickable ${String(t.ID_Transaksi).startsWith('tmp-') ? 'pending-sync' : ''}" data-trx="${e(t.ID_Transaksi)}">
         ${UI.tileTrx(t, ix)}<div class="meta"><div class="ttl">${e(nama)}</div><div class="sub"><span>${U.relatif(t.Tanggal)}</span><span class="sep"></span>${UI.statusTrx(t)}</div></div>
         <div class="amt ${kelas}">${nilai}</div></button>`;
     },
 
     insightHtml(db, per, ambang) {
-      const semua = Calc.insights(db, per, ambang);
+      const semua = Calc.insights(db, per, ambang, rp);
       const chips = [['semua', 'Semua'], ['kategori', 'Kategori terbesar'], ['anggaran', 'Anggaran'], ['aruskas', 'Arus kas'], ['target', 'Target']];
       const tampil = (st.chip === 'semua' ? semua.slice(0, 3) : semua.filter(x => x.tipe === st.chip));
       return `<div class="row-between"><h3 style="font-size:17px">Insight Keuangan</h3>${UI.ic('trending-up', 'ic-sm t-accent')}</div>
@@ -163,6 +174,13 @@
       el.querySelector('[data-catat]').onclick = () => App.catat();
       el.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { st.tab = b.dataset.tab; App.render(); });
       el.addEventListener('click', ev => {
+        if (ev.target.closest('[data-sembunyi]')) {
+          U.simpanLokal('cs_sembunyi_saldo', sembunyi() ? '0' : '1');
+          App.render();
+          const t = document.querySelector('#view [data-sembunyi]');
+          if (t) t.focus({ preventScroll: true });
+          return;
+        }
         const c = ev.target.closest('[data-chip]');
         if (c) { st.chip = c.dataset.chip; el.querySelector('[data-insight]').innerHTML = Dash.insightHtml(Store.db, App.periode(), App.ambang()); return; }
         const k = ev.target.closest('[data-kat]');
@@ -185,14 +203,14 @@
           const bulan = seriBulan(per), data = Calc.bulanan(db, bulan);
           Charts.batang(cv, {
             labels: bulan.map(m => U.bulanNama(m)), masuk: data.map(d => d.masuk), keluar: data.map(d => d.keluar),
-            sorot: bulan.map(m => per.bulan.indexOf(m) >= 0),
+            sorot: bulan.map(m => per.bulan.indexOf(m) >= 0), sembunyi: sembunyi(),
             onKlik: (i, ds) => { const m = bulan[i]; App.go('#/riwayat?' + U.qs({ jenis: ds === 0 ? 'Masuk' : 'Keluar', dari: m + '-01', sampai: m + '-' + U.hariDalam(m) })); }
           });
         } else {
           const akhir = per.sampai > U.hariIni() ? U.hariIni() : per.sampai;
           const mg = Calc.mingguan(db, per.dari, akhir < per.dari ? per.dari : akhir);
           Charts.batang(cv, {
-            labels: mg.map(w => w.label), masuk: mg.map(w => w.masuk), keluar: mg.map(w => w.keluar),
+            labels: mg.map(w => w.label), masuk: mg.map(w => w.masuk), keluar: mg.map(w => w.keluar), sembunyi: sembunyi(),
             onKlik: (i, ds) => App.go('#/riwayat?' + U.qs({ jenis: ds === 0 ? 'Masuk' : 'Keluar', dari: mg[i].dari, sampai: mg[i].sampai }))
           });
         }
