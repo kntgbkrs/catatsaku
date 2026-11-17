@@ -21,9 +21,16 @@
       const ikonIns = { kategori: 'utensils', aruskas: 'trending-down', anggaran: 'alert-triangle', target: 'shield' };
       const lihat = (o, t) => `<a class="link-more" href="#/riwayat?${U.qs(Object.assign({ dari: per.dari, sampai: per.sampai }, o))}" style="font-size:13px">${t || 'Lihat transaksi'} ${UI.ic('arrow-up-right', 'ic-xs')}</a>`;
       const HARI = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
-      let puncak = null;
-      heat.m.forEach((row, w) => row.forEach((v, d) => { if (v && (!puncak || v > puncak.v)) puncak = { v, w, d }; }));
+      const kini = U.hariIni();
       const lvl = v => (!v || !heat.max ? '' : 'l' + Math.min(4, Math.max(1, Math.ceil(v / heat.max * 4))));
+      const sel = c => {
+        if (!c) return '<span class="cell out" aria-hidden="true"></span>';
+        const no = `<span class="d">${Number(c.tgl.slice(8))}</span>`;
+        if (c.luar || c.tgl > kini) return `<span class="cell ${c.luar ? 'out' : 'fut'}" title="${U.tglHari(c.tgl)}: ${c.luar ? 'di luar periode' : 'belum terjadi'}">${no}</span>`;
+        const lbl = `${U.tglHari(c.tgl)}: ${U.rp(c.v)}`;
+        return `<button type="button" class="cell ${lvl(c.v)}${c.tgl === kini ? ' now' : ''}" data-heat="${c.tgl}" title="${lbl}" aria-label="${lbl}">${no}${c.v ? U.sumbuRp(c.v) : '·'}</button>`;
+      };
+      const labelPekan = row => { const a = row.find(Boolean).tgl, b = row.filter(Boolean).pop().tgl; return a === b ? U.tglPendek(a) : Number(a.slice(8)) + '–' + U.tglPendek(b); };
 
       return `
         <div class="page-head">
@@ -74,12 +81,12 @@
               <div class="mt-8">${UI.progress(i.persen, i.tercapai ? 'aman' : '', true)}</div></a>`; }).join('') : UI.kosong('target', 'Belum ada target', '')}</section>
         </div>
 
-        <section class="card mt-24"><div class="card-head"><div><h2 class="card-title">Pola Pengeluaran (Peta Panas Hari × Minggu)</h2><p class="card-sub">Intensitas pengeluaran per hari dalam minggu × minggu dalam bulan · ${e(per.label)}</p></div>${lihat({ jenis: 'Keluar' })}</div>
-          ${heat.max ? `<div class="heat" role="table" aria-label="Peta panas pengeluaran"><span></span>${HARI.map(h => `<span class="hd" role="columnheader">${h.slice(0, 3)}</span>`).join('')}
-            ${heat.m.slice(0, heat.baris).map((row, w) => `<span class="rl" role="rowheader">Minggu ${w + 1}</span>${row.map((v, d) => `<button type="button" class="cell ${lvl(v)}" data-heat="${w},${d}" title="Minggu ${w + 1}, ${HARI[d]}: ${U.rp(v)}" aria-label="Minggu ${w + 1} ${HARI[d]}: ${U.rp(v)}">${v ? U.sumbuRp(v) : '·'}</button>`).join('')}`).join('')}</div>
-            <div class="row-between mt-16" style="flex-wrap:wrap"><div class="heat-legend">Rendah ${[0, 1, 2, 3, 4].map(i => `<i style="background:var(--heat-${i})"></i>`).join('')} Tinggi (≈ ${U.rpPendek(heat.max)})</div>
-              ${puncak ? `<span class="note" style="padding:8px 12px">${UI.ic('lightbulb', 'ic-sm t-warn')}<span>Pengeluaran tertinggi pada hari <b>${HARI[puncak.d]}</b>, pekan ke-${puncak.w + 1} (${U.rp(puncak.v)}).</span></span>` : ''}</div>`
-            : UI.kosong('flame', 'Belum ada pengeluaran periode ini', 'Peta panas muncul setelah ada transaksi pengeluaran tercatat.')}</section>
+        <section class="card mt-24"><div class="card-head"><div><h2 class="card-title">Pola Pengeluaran (Kalender Harian)</h2><p class="card-sub">Total pengeluaran per tanggal · ${U.bulanPanjang(heat.ym)}${per.bulan.length > 1 ? ' (bulan terakhir periode)' : ''}</p></div>${lihat({ jenis: 'Keluar' })}</div>
+          ${heat.max ? `<div class="heat" role="table" aria-label="Kalender pengeluaran ${U.bulanPanjang(heat.ym)}"><span></span>${HARI.map(h => `<span class="hd" role="columnheader">${h.slice(0, 3)}</span>`).join('')}
+            ${heat.minggu.map(row => `<span class="rl" role="rowheader">${labelPekan(row)}</span>${row.map(sel).join('')}`).join('')}</div>
+            <div class="row-between mt-16" style="flex-wrap:wrap"><div class="heat-legend">Rendah ${[0, 1, 2, 3, 4].map(i => `<i style="background:var(--heat-${i})"></i>`).join('')} Tinggi (≈ ${U.rpPendek(heat.max)})${heat.ym === kini.slice(0, 7) ? '<i class="now"></i> Hari ini <i class="fut"></i> Belum terjadi' : ''}</div>
+              ${heat.puncak ? `<span class="note" style="padding:8px 12px">${UI.ic('lightbulb', 'ic-sm t-warn')}<span>Pengeluaran tertinggi pada <b>${U.tglHari(heat.puncak.tgl)}</b> (${U.rp(heat.puncak.v)}).</span></span>` : ''}</div>`
+            : UI.kosong('flame', 'Belum ada pengeluaran di ' + U.bulanPanjang(heat.ym), 'Peta panas muncul setelah ada transaksi pengeluaran tercatat.')}</section>
 
         <section class="card mt-24"><h2 class="card-title">Insight Finansial Otomatis</h2><p class="card-sub">Dihitung dari kalkulasi buku kas Anda — tanpa pemrosesan AI eksternal.</p>
           <div class="g mt-16" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:14px">${ins.length ? ins.map(x => `<a class="panel" href="${x.link}" style="color:inherit;text-decoration:none;display:flex;flex-direction:column;gap:10px">
@@ -95,7 +102,8 @@
         const u = q('[data-urut]');
         if (u) { urut = u.dataset.urut; return App.render(); }
         if (q('[data-info-rate]')) return UI.modal({ kelas: 'sm', judul: 'Tingkat Tabungan', label: 'Definisi', isi: '<p class="muted">(Σ setor − Σ tarik kontribusi target yang tercatat) ÷ pemasukan periode × 100%. Bila pemasukan = 0 ditampilkan "–".</p>', kaki: '<button class="btn btn-primary" data-tutup type="button">Mengerti</button>' });
-        if (q('[data-heat]')) return App.go('#/riwayat?' + U.qs({ jenis: 'Keluar', dari: per.dari, sampai: per.sampai }));
+        const hc = q('[data-heat]');
+        if (hc) return App.go('#/riwayat?' + U.qs({ jenis: 'Keluar', dari: hc.dataset.heat, sampai: hc.dataset.heat }));
         if (q('[data-xlsx]') || q('[data-pdf]')) return L.ekspor(q('[data-xlsx]') || q('[data-pdf]'), !!q('[data-pdf]'));
       });
 

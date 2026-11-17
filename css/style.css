@@ -452,13 +452,18 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .heat .hd { font-size: 12px; color: var(--muted); text-align: center; font-weight: 600; }
 .heat .rl { font-size: 12.5px; color: var(--muted); font-weight: 600; }
 .heat .cell {
-  height: 40px; border-radius: 10px; display: grid; place-items: center; font: 600 11.5px/1 var(--font-body);
+  position: relative; height: 46px; padding-top: 8px; border-radius: 10px; display: grid; place-items: center; font: 600 11.5px/1 var(--font-body);
   background: var(--heat-0); color: var(--muted); cursor: pointer; transition: transform var(--dur); font-variant-numeric: tabular-nums;
 }
 .heat .cell:hover { transform: scale(1.06); }
+.heat .cell .d { position: absolute; top: 5px; left: 7px; font: 500 10px/1 var(--font-body); opacity: .75; }
+.heat .cell.out, .heat .cell.fut { background: transparent; cursor: default; transform: none; }
+.heat .cell.fut, .heat-legend i.fut { border: 1px dashed color-mix(in srgb, var(--muted) 45%, transparent); }
+.heat .cell.now, .heat-legend i.now { box-shadow: inset 0 0 0 2px var(--accent); }
+.heat-legend i.now, .heat-legend i.fut { margin-left: 10px; }
 .heat .l1 { background: var(--heat-1); color: var(--text); } .heat .l2 { background: var(--heat-2); color: var(--text); }
 .heat .l3 { background: var(--heat-3); color: #fff; } .heat .l4 { background: var(--heat-4); color: #fff; }
-.heat-legend { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.heat-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
 .heat-legend i { width: 18px; height: 12px; border-radius: 4px; display: inline-block; }
 
 /* ---------- chart ---------- */
@@ -713,7 +718,9 @@ table.table { width: 100%; border-collapse: collapse; font-size: 14px; }
   .table.cards td.r { text-align: right; }
   .theme-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .heat { grid-template-columns: 54px repeat(7, minmax(0, 1fr)); gap: 4px; }
-  .heat .cell { height: 34px; font-size: 10px; border-radius: 8px; }
+  .heat .cell { height: 42px; font-size: 10px; border-radius: 8px; }
+  .heat .cell .d { top: 4px; left: 5px; }
+  .heat .rl { font-size: 11px; }
   .lock-top { padding: 14px 16px; }
 }
 @keyframes dariBawah { from { transform: translateY(40px); opacity: .4; } }

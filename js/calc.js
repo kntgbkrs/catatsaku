@@ -191,17 +191,25 @@
     },
 
     // ------------------------------------------------------------- pola pengeluaran (B7)
+    // Kalender satu bulan (pekan Senin–Minggu): bulan terakhir periode yang sudah berjalan.
+    // minggu[baris][kolom] = { tgl, v } | null (tanggal bulan lain); luar = di luar rentang periode.
     heat(db, dari, sampai) {
-      const m = [0, 1, 2, 3, 4, 5].map(() => [0, 0, 0, 0, 0, 0, 0]);
+      const h = U.hariIni(), ym = (sampai < h ? sampai : h < dari ? dari : h).slice(0, 7);
+      const awal = (U.hariMinggu(ym + '-01') + 6) % 7, n = U.hariDalam(ym); // Senin = 0
+      const per = {};
       for (const t of C.idx(db).ok) {
-        if (t.Jenis !== 'Keluar' || !C.dalam(t, dari, sampai)) continue;
         const d = t.Tanggal.slice(0, 10);
-        const dow = (U.hariMinggu(d) + 6) % 7; // Senin = 0
-        const awal = (U.hariMinggu(d.slice(0, 8) + '01') + 6) % 7; // posisi tgl 1 di pekan Senin–Minggu
-        m[Math.floor((Number(d.slice(8)) - 1 + awal) / 7)][dow] += t.Nominal;
+        if (t.Jenis === 'Keluar' && d.startsWith(ym) && C.dalam(t, dari, sampai)) per[d] = (per[d] || 0) + t.Nominal;
       }
-      const max = Math.max(0, ...m.flat());
-      return { m, max, baris: Math.max(4, ...m.map((r, i) => (r.some(v => v > 0) ? i + 1 : 0))) };
+      const minggu = [];
+      for (let i = 0; i < Math.ceil((awal + n) / 7) * 7; i++) {
+        const k = i - awal + 1, tgl = k >= 1 && k <= n ? ym + '-' + String(k).padStart(2, '0') : null;
+        if (i % 7 === 0) minggu.push([]);
+        minggu[minggu.length - 1].push(tgl && (tgl < dari || tgl > sampai ? { tgl, v: 0, luar: true } : { tgl, v: per[tgl] || 0 }));
+      }
+      let puncak = null;
+      Object.keys(per).forEach(tgl => { if (!puncak || per[tgl] > puncak.v) puncak = { tgl, v: per[tgl] }; });
+      return { ym, minggu, max: puncak ? puncak.v : 0, puncak };
     },
 
     // ------------------------------------------------------------- riwayat saldo (B2)
