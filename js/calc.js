@@ -192,15 +192,16 @@
 
     // ------------------------------------------------------------- pola pengeluaran (B7)
     heat(db, dari, sampai) {
-      const m = [0, 1, 2, 3, 4].map(() => [0, 0, 0, 0, 0, 0, 0]);
+      const m = [0, 1, 2, 3, 4, 5].map(() => [0, 0, 0, 0, 0, 0, 0]);
       for (const t of C.idx(db).ok) {
         if (t.Jenis !== 'Keluar' || !C.dalam(t, dari, sampai)) continue;
-        const d = t.Tanggal.slice(0, 10), w = Math.min(4, Math.floor((Number(d.slice(8)) - 1) / 7));
+        const d = t.Tanggal.slice(0, 10);
         const dow = (U.hariMinggu(d) + 6) % 7; // Senin = 0
-        m[w][dow] += t.Nominal;
+        const awal = (U.hariMinggu(d.slice(0, 8) + '01') + 6) % 7; // posisi tgl 1 di pekan Senin–Minggu
+        m[Math.floor((Number(d.slice(8)) - 1 + awal) / 7)][dow] += t.Nominal;
       }
       const max = Math.max(0, ...m.flat());
-      return { m, max, ada5: m[4].some(v => v > 0) };
+      return { m, max, baris: Math.max(4, ...m.map((r, i) => (r.some(v => v > 0) ? i + 1 : 0))) };
     },
 
     // ------------------------------------------------------------- riwayat saldo (B2)

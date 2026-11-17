@@ -76,9 +76,9 @@
 
         <section class="card mt-24"><div class="card-head"><div><h2 class="card-title">Pola Pengeluaran (Peta Panas Hari × Minggu)</h2><p class="card-sub">Intensitas pengeluaran per hari dalam minggu × minggu dalam bulan · ${e(per.label)}</p></div>${lihat({ jenis: 'Keluar' })}</div>
           ${heat.max ? `<div class="heat" role="table" aria-label="Peta panas pengeluaran"><span></span>${HARI.map(h => `<span class="hd" role="columnheader">${h.slice(0, 3)}</span>`).join('')}
-            ${heat.m.slice(0, heat.ada5 ? 5 : 4).map((row, w) => `<span class="rl" role="rowheader">Minggu ${w + 1}</span>${row.map((v, d) => `<button type="button" class="cell ${lvl(v)}" data-heat="${w},${d}" title="Minggu ${w + 1}, ${HARI[d]}: ${U.rp(v)}" aria-label="Minggu ${w + 1} ${HARI[d]}: ${U.rp(v)}">${v ? U.sumbuRp(v) : '·'}</button>`).join('')}`).join('')}</div>
+            ${heat.m.slice(0, heat.baris).map((row, w) => `<span class="rl" role="rowheader">Minggu ${w + 1}</span>${row.map((v, d) => `<button type="button" class="cell ${lvl(v)}" data-heat="${w},${d}" title="Minggu ${w + 1}, ${HARI[d]}: ${U.rp(v)}" aria-label="Minggu ${w + 1} ${HARI[d]}: ${U.rp(v)}">${v ? U.sumbuRp(v) : '·'}</button>`).join('')}`).join('')}</div>
             <div class="row-between mt-16" style="flex-wrap:wrap"><div class="heat-legend">Rendah ${[0, 1, 2, 3, 4].map(i => `<i style="background:var(--heat-${i})"></i>`).join('')} Tinggi (≈ ${U.rpPendek(heat.max)})</div>
-              ${puncak ? `<span class="note" style="padding:8px 12px">${UI.ic('lightbulb', 'ic-sm t-warn')}<span>Pengeluaran tertinggi pada <b>${HARI[puncak.d]}</b> minggu ke-${puncak.w + 1} (${U.rp(puncak.v)}).</span></span>` : ''}</div>`
+              ${puncak ? `<span class="note" style="padding:8px 12px">${UI.ic('lightbulb', 'ic-sm t-warn')}<span>Pengeluaran tertinggi pada hari <b>${HARI[puncak.d]}</b>, pekan ke-${puncak.w + 1} (${U.rp(puncak.v)}).</span></span>` : ''}</div>`
             : UI.kosong('flame', 'Belum ada pengeluaran periode ini', 'Peta panas muncul setelah ada transaksi pengeluaran tercatat.')}</section>
 
         <section class="card mt-24"><h2 class="card-title">Insight Finansial Otomatis</h2><p class="card-sub">Dihitung dari kalkulasi buku kas Anda — tanpa pemrosesan AI eksternal.</p>
